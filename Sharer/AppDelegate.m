@@ -16,8 +16,6 @@
 
 @property (strong) NSStatusItem *statusItem;
 
-@property (atomic) NSInteger numberOfDots;
-
 @property (strong) dispatch_queue_t uploadQueue;
 @property (strong) NSMutableSet *activeSessions;
 @end
@@ -200,39 +198,22 @@
 #pragma mark -
 
 - (void) startUpdatingButtonTitle {
-	self.numberOfDots = 0;
+	NSProgressIndicator *indicator = [[NSProgressIndicator alloc] initWithFrame:self.statusItem.view.bounds];
+	indicator.controlSize = NSMiniControlSize;
+	indicator.style = NSProgressIndicatorSpinningStyle;
+	[indicator startAnimation:nil];
 
-	[self updateButtonTitle];
-}
-
-- (void) updateButtonTitle {
 	DraggableButton *button = (DraggableButton *)self.statusItem.view;
-	if (self.numberOfDots == 3) {
-		[button setTitle:@"⌈"];
-		[button setAlignment:NSLeftTextAlignment];
-	} else if (self.numberOfDots == 2) {
-		[button setTitle:@"⌉"];
-		[button setAlignment:NSRightTextAlignment];
-	} else if (self.numberOfDots == 1) {
-		[button setTitle:@"⌋"];
-		[button setAlignment:NSRightTextAlignment];
-	} else if (self.numberOfDots == 0) {
-		[button setTitle:@"⌊"];
-		[button setAlignment:NSLeftTextAlignment];
-	}
+	button.title = nil;
 
-	self.numberOfDots++;
-	if (self.numberOfDots > 4) {
-		self.numberOfDots = 0;
-	}
-
-	[self performSelector:_cmd withObject:nil afterDelay:.25];
+	[button addSubview:indicator];
 }
 
 - (void) stopUpdatingButtonTitle {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateButtonTitle) object:nil];
 
 	DraggableButton *button = (DraggableButton *)self.statusItem.view;
+	[button.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
 	[button setTitle:@"↑"];
 }
 
