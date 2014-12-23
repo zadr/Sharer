@@ -1,12 +1,15 @@
 #import "AppDelegate.h"
 
 #import "DraggableButton.h"
+#import "SFTPUpload.h"
 #import "CQKeychain.h"
 
 #import <NMSSH/NMSSH.h>
 
-@interface AppDelegate () <DraggableDelegate>
+@interface AppDelegate () <DraggableDelegate, UploadDelegate>
 @property (weak) IBOutlet NSWindow *window;
+@property (strong) NSWindow *preferencesWindow;
+
 @property (weak) IBOutlet NSTextField *serverTextField;
 @property (weak) IBOutlet NSTextField *remotePathTextField;
 @property (weak) IBOutlet NSTextField *URLFormatTextField;
@@ -25,6 +28,9 @@
 @implementation AppDelegate
 - (void) applicationWillFinishLaunching:(NSNotification *) notification {
 //	[NMSSHLogger logger].enabled = NO;
+
+	NSDictionary *defaults = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Defaults" ofType:@"plist"]];
+	[[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
 	self.uploadQueue = dispatch_queue_create("net.thisismyinter.upload", DISPATCH_QUEUE_CONCURRENT);
 	self.activeSessions = [NSMutableSet set];
@@ -95,6 +101,7 @@
 	if (URLFormat.length && !URL.scheme.length) {
 		URLFormat = [@"http://" stringByAppendingString:URLFormat];
 	}
+
 	[[NSUserDefaults standardUserDefaults] setObject:URLFormat forKey:@"URLFormat"];
 
 	return YES;
@@ -111,6 +118,7 @@
 			[alert addButtonWithTitle:NSLocalizedString(@"Okay", @"Okay")];
 			[alert runModal];
 		}
+
 		return validPort;
 	}
 	return YES;
@@ -119,102 +127,56 @@
 #pragma mark -
 
 - (void) uploadFileAtPath:(NSString *) path {
-	[self startUpdatingButtonTitle];
+	SFTPUpload *upload = [SFTPUpload uploadFile:path];
+	upload.delegate = self;
 
-	NSInputStream *inputStream = [NSInputStream inputStreamWithFileAtPath:path];
-	if (!inputStream) {
-		[self stopUpdatingButtonTitle];
-		NSLog(@"no input stream for %@", path);
-		return;
-	}
+	[self.activeSessions addObject:upload];
 
-	NSString *server = [[NSUserDefaults standardUserDefaults] objectForKey:@"server"];
-	NSString *port = [[NSUserDefaults standardUserDefaults] objectForKey:@"port"];
-	if (!port.length) {
-		port = @"22";
-	}
-	NSString *hostport = [NSString stringWithFormat:@"%@:%@", server, port];
-	NSString *username = [[NSUserDefaults standardUserDefaults] objectForKey:@"username"];
-	NMSSHSession *session = [NMSSHSession connectToHost:hostport withUsername:username];
-	if (session.isConnected) {
-		NSString *password = [[CQKeychain standardKeychain] passwordForServer:@"password" area:@"sharer"];
-		[session authenticateByPassword:password];
-
-		if (!session.isAuthorized) {
-			// try with standard key pair
-			NSString *defaultPubkeyPath = [@"~/.ssh/id_rsa.pub" stringByExpandingTildeInPath];
-			NSString *defaultPrivkeyPath = [@"~/.ssh/id_rsa" stringByExpandingTildeInPath];
-			if ([[NSFileManager defaultManager] fileExistsAtPath:defaultPubkeyPath] && [[NSFileManager defaultManager] fileExistsAtPath:defaultPrivkeyPath]) {
-				[session authenticateByPublicKey:defaultPubkeyPath privateKey:defaultPrivkeyPath andPassword:password];
-			}
-		}
-	} else {
-		[self stopUpdatingButtonTitle];
-		NSLog(@"Unable to connect");
-		return;
-	}
-
-	if (!session.isAuthorized) {
-		[self stopUpdatingButtonTitle];
-		NSLog(@"Unable to authorize");
-		return;
-	}
-
-	NMSFTP *sftpSession = [NMSFTP connectWithSession:session];
-	if (!sftpSession) {
-		[self stopUpdatingButtonTitle];
-		NSLog(@"Unable to make an SFTP session");
-		return;
-	}
-
-	[self.activeSessions addObject:session];
-	[self.activeSessions addObject:sftpSession];
-
-	__weak __typeof__((self)) weakSelf = self;
-	dispatch_async(self.uploadQueue, ^{
-		NSUInteger fileLength = [[[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil] fileSize];
-		NSString *remotePath = [[NSUserDefaults standardUserDefaults] objectForKey:@"remotePath"];
-		if (!remotePath.length) {
-			remotePath = @"";
-		}
-		NSString *fullRemotePath = [remotePath stringByAppendingPathComponent:path.lastPathComponent];
-		[sftpSession writeStream:inputStream toFileAtPath:fullRemotePath progress:^BOOL (NSUInteger progress) {
-			if (progress == fileLength) {
-				dispatch_async(dispatch_get_main_queue(), ^{ // give the sftp session a chance to finish up any remaining work it has before we remove our references to it
-					__strong __typeof__((weakSelf)) strongSelf = weakSelf;
-
-					[sftpSession disconnect];
-					[session disconnect];
-
-					[strongSelf.activeSessions removeObject:sftpSession];
-					[strongSelf.activeSessions removeObject:session];
-
-					if (!strongSelf.activeSessions.count) {
-						[strongSelf stopUpdatingButtonTitle];
-					}
-				});
-
-				NSString *URLFormat = [[NSUserDefaults standardUserDefaults] objectForKey:@"URLFormat"];
-				NSURL *URL = [[NSURL URLWithString:URLFormat] URLByAppendingPathComponent:path.lastPathComponent];
-
-				[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
-				[[NSPasteboard generalPasteboard] setString:URL.absoluteString forType:NSStringPboardType];
-
-				NSUserNotification *notification = [[NSUserNotification alloc] init];
-				notification.title = NSLocalizedString(@"Uploaded", @"Uploaded");
-				notification.subtitle = [NSString stringWithFormat:NSLocalizedString(@"Finished uploading %@.", @"Finished uploading file notification"), path.lastPathComponent];
-				notification.soundName = NSUserNotificationDefaultSoundName;
-
-				[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
-			}
-			return YES;
-		}];
-	});
+	[upload startOnQueue:self.uploadQueue];
 }
+
+- (void) uploadDidStart:(id <Upload>) upload {
+	[self startUpdatingButtonTitle];
+}
+
+- (void) uploadDidFinish:(id <Upload>) upload {
+	[self.activeSessions removeObject:upload];
+	[self stopUpdatingButtonTitle];
+
+	NSString *URLFormat = [[NSUserDefaults standardUserDefaults] objectForKey:@"URLFormat"];
+	NSURL *URL = [[NSURL URLWithString:URLFormat] URLByAppendingPathComponent:upload.source.lastPathComponent];
+
+	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
+	[[NSPasteboard generalPasteboard] setString:URL.absoluteString forType:NSStringPboardType];
+
+	NSUserNotification *notification = [[NSUserNotification alloc] init];
+	notification.title = NSLocalizedString(@"Uploaded", @"Uploaded");
+	notification.subtitle = [NSString stringWithFormat:NSLocalizedString(@"Finished uploading %@.", @"Finished uploading file notification"), upload.source.lastPathComponent];
+	notification.soundName = NSUserNotificationDefaultSoundName;
+
+	[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+}
+
+- (void) upload:(id <Upload>) upload didFailWithError:(NSError *) error {
+	[self.activeSessions removeObject:upload];
+	[self stopUpdatingButtonTitle];
+
+	NSUserNotification *notification = [[NSUserNotification alloc] init];
+	notification.title = NSLocalizedString(@"Upload Failed", @"Upload Failed");
+	notification.subtitle = [NSString stringWithFormat:NSLocalizedString(@"Unable to upload %@.", @"Unable to upload file notification"), upload.source.lastPathComponent];
+	notification.soundName = NSUserNotificationDefaultSoundName;
+
+	[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+}
+
 
 #pragma mark -
 
 - (void) startUpdatingButtonTitle {
+	if (self.activeSessions.count > 1) {
+		return;
+	}
+
 	NSProgressIndicator *indicator = [[NSProgressIndicator alloc] initWithFrame:self.statusItem.view.bounds];
 	indicator.controlSize = NSMiniControlSize;
 	indicator.style = NSProgressIndicatorSpinningStyle;
@@ -227,6 +189,10 @@
 }
 
 - (void) stopUpdatingButtonTitle {
+	if (self.activeSessions.count) {
+		return;
+	}
+
 	DraggableButton *button = (DraggableButton *)self.statusItem.view;
 	[button.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
 	[button setTitle:@"↑"];
