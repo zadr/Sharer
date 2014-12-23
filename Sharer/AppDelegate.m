@@ -9,6 +9,7 @@
 @property (weak) IBOutlet NSWindow *window;
 @property (weak) IBOutlet NSTextField *serverTextField;
 @property (weak) IBOutlet NSTextField *remotePathTextField;
+@property (weak) IBOutlet NSTextField *URLFormatTextField;
 @property (weak) IBOutlet NSTextField *portTextField;
 @property (weak) IBOutlet NSTextField *usernameTextField;
 @property (weak) IBOutlet NSTextField *passwordTextField;
@@ -25,6 +26,8 @@
 
 @implementation AppDelegate
 - (void) applicationWillFinishLaunching:(NSNotification *) notification {
+//	[NMSSHLogger logger].enabled = NO;
+
 	self.uploadQueue = dispatch_queue_create("net.thisismyinter.upload", DISPATCH_QUEUE_CONCURRENT);
 	self.activeSessions = [NSMutableSet set];
 
@@ -40,19 +43,26 @@
 - (void) applicationDidFinishLaunching:(NSNotification *) notification {
 	self.usernameTextField.placeholderString = NSUserName();
 
-#define SetValueOfTypeOnField(type, field) \
+#define SetValueOfTypeOnField(type, field, fromKeychain) \
 	do { \
-		NSString *value = [[CQKeychain standardKeychain] passwordForServer:type area:@"sharer"]; \
+		NSString *value = nil; \
+		if (fromKeychain) { \
+			value = [[CQKeychain standardKeychain] passwordForServer:type area:@"sharer"]; \
+		} else { \
+			value = [[NSUserDefaults standardUserDefaults] objectForKey:type]; \
+		} \
+ \
 		if (value.length) { \
 			field.stringValue = value; \
 		} \
 	} while (0)
 
-	SetValueOfTypeOnField(@"server", self.serverTextField);
-	SetValueOfTypeOnField(@"port", self.portTextField);
-	SetValueOfTypeOnField(@"remotePath", self.remotePathTextField);
-	SetValueOfTypeOnField(@"username", self.usernameTextField);
-	SetValueOfTypeOnField(@"password", self.passwordTextField);
+	SetValueOfTypeOnField(@"server", self.serverTextField, NO);
+	SetValueOfTypeOnField(@"port", self.portTextField, NO);
+	SetValueOfTypeOnField(@"remotePath", self.remotePathTextField, NO);
+	SetValueOfTypeOnField(@"URLFormat", self.URLFormatTextField, NO);
+	SetValueOfTypeOnField(@"username", self.usernameTextField, NO);
+	SetValueOfTypeOnField(@"password", self.passwordTextField, YES);
 #undef SetValueOfTypeOnField
 }
 
@@ -76,11 +86,17 @@
 #pragma mark -
 
 - (BOOL) control:(NSControl *) control textShouldEndEditing:(NSText *) fieldEditor {
-	[[CQKeychain standardKeychain] setPassword:self.serverTextField.stringValue forServer:@"server" area:@"sharer"];
-	[[CQKeychain standardKeychain] setPassword:self.portTextField.stringValue forServer:@"port" area:@"sharer"];
-	[[CQKeychain standardKeychain] setPassword:self.remotePathTextField.stringValue forServer:@"remotePath" area:@"sharer"];
-	[[CQKeychain standardKeychain] setPassword:self.usernameTextField.stringValue forServer:@"username" area:@"sharer"];
+	[[NSUserDefaults standardUserDefaults] setObject:self.serverTextField.stringValue forKey:@"server"];
+	[[NSUserDefaults standardUserDefaults] setObject:self.portTextField.stringValue forKey:@"port"];
+	[[NSUserDefaults standardUserDefaults] setObject:self.remotePathTextField.stringValue forKey:@"remotePath"];
+	[[NSUserDefaults standardUserDefaults] setObject:self.usernameTextField.stringValue forKey:@"username"];
 	[[CQKeychain standardKeychain] setPassword:self.passwordTextField.stringValue forServer:@"password" area:@"sharer"];
+
+	NSString *URLFormat = self.URLFormatTextField.stringValue;
+	if (URLFormat.length && !([URLFormat.lowercaseString hasPrefix:@"http://"] || [URLFormat.lowercaseString hasPrefix:@"https://"])) {
+		URLFormat = [@"http://" stringByAppendingString:URLFormat];
+	}
+	[[NSUserDefaults standardUserDefaults] setObject:URLFormat forKey:@"URLFormat"];
 
 	return YES;
 }
@@ -113,19 +129,17 @@
 		return;
 	}
 
-	NSString *server = [[CQKeychain standardKeychain] passwordForServer:@"server" area:@"sharer"];
-	NSString *port = [[CQKeychain standardKeychain] passwordForServer:@"port" area:@"sharer"];
+	NSString *server = [[NSUserDefaults standardUserDefaults] objectForKey:@"server"];
+	NSString *port = [[NSUserDefaults standardUserDefaults] objectForKey:@"port"];
 	if (!port.length) {
 		port = @"22";
 	}
 	NSString *hostport = [NSString stringWithFormat:@"%@:%@", server, port];
-	NSString *username = [[CQKeychain standardKeychain] passwordForServer:@"username" area:@"sharer"];
+	NSString *username = [[NSUserDefaults standardUserDefaults] objectForKey:@"username"];
 	NMSSHSession *session = [NMSSHSession connectToHost:hostport withUsername:username];
 	if (session.isConnected) {
 		NSString *password = [[CQKeychain standardKeychain] passwordForServer:@"password" area:@"sharer"];
-		if (password.length) {
-			[session authenticateByPassword:@"password"];
-		}
+		[session authenticateByPassword:password];
 	} else {
 		[self stopUpdatingButtonTitle];
 		NSLog(@"Unable to connect");
@@ -151,7 +165,7 @@
 	__weak __typeof__((self)) weakSelf = self;
 	dispatch_async(self.uploadQueue, ^{
 		NSUInteger fileLength = [[[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil] fileSize];
-		NSString *remotePath = [[CQKeychain standardKeychain] passwordForServer:@"remotePath" area:@"sharer"];
+		NSString *remotePath = [[NSUserDefaults standardUserDefaults] objectForKey:@"remotePath"];
 		if (!remotePath.length) {
 			remotePath = @"";
 		}
@@ -171,9 +185,10 @@
 					}
 				});
 
-				NSString *remoteString = [NSString stringWithFormat:@"http://your.domain/path/%@", path.lastPathComponent];
+				NSString *URLFormat = [[NSUserDefaults standardUserDefaults] objectForKey:@"URLFormat"];
+				NSString *URLString = [URLFormat stringByAppendingPathComponent:path.lastPathComponent];
 				[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
-				[[NSPasteboard generalPasteboard] setString:remoteString forType:NSStringPboardType];
+				[[NSPasteboard generalPasteboard] setString:URLString forType:NSStringPboardType];
 
 				NSBeep();
 			}
