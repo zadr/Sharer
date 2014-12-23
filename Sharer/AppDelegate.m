@@ -138,11 +138,14 @@
 	if (session.isConnected) {
 		NSString *password = [[CQKeychain standardKeychain] passwordForServer:@"password" area:@"sharer"];
 		[session authenticateByPassword:password];
+
 		if (!session.isAuthorized) {
 			// try with standard key pair
 			NSString *defaultPubkeyPath = [@"~/.ssh/id_rsa.pub" stringByExpandingTildeInPath];
 			NSString *defaultPrivkeyPath = [@"~/.ssh/id_rsa" stringByExpandingTildeInPath];
-			[session authenticateByPublicKey:defaultPubkeyPath privateKey:defaultPrivkeyPath andPassword:password];
+			if ([[NSFileManager defaultManager] fileExistsAtPath:defaultPubkeyPath] && [[NSFileManager defaultManager] fileExistsAtPath:defaultPrivkeyPath]) {
+				[session authenticateByPublicKey:defaultPubkeyPath privateKey:defaultPrivkeyPath andPassword:password];
+			}
 		}
 	} else {
 		[self stopUpdatingButtonTitle];
