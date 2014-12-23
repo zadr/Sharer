@@ -491,6 +491,7 @@
 				92CBEDA21A48FDA700A02B9E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		92CBEDA31A48FDA700A02B9E /* Build configuration list for PBXNativeTarget "SharerTests" */ = {
 			isa = XCConfigurationList;
@@ -499,6 +500,7 @@
 				92CBEDA51A48FDA700A02B9E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

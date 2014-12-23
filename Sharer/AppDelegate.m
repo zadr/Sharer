@@ -122,7 +122,6 @@
 
 - (void) updateButtonTitle {
 	DraggableButton *button = (DraggableButton *)self.statusItem.view;
-	// ⎡⎤⎦⎣ ⌊⌋⌈⌉
 	if (self.numberOfDots == 3) {
 		[button setTitle:@"⌈"];
 		[button setAlignment:NSLeftTextAlignment];
