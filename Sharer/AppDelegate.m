@@ -189,6 +189,12 @@
 				[[NSPasteboard generalPasteboard] setString:URLString forType:NSStringPboardType];
 
 				NSBeep();
+
+				NSUserNotification *notification = [[NSUserNotification alloc] init];
+				notification.title = NSLocalizedString(@"Uploaded", @"Uploaded");
+				notification.subtitle = [NSString stringWithFormat:NSLocalizedString(@"Done uploading %@.", @"Done uploading file notification"), path.lastPathComponent];
+
+				[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
 			}
 			return YES;
 		}];
