@@ -2,6 +2,7 @@
 
 #import "DraggableButton.h"
 #import "SFTPUpload.h"
+#import "FTPUpload.h"
 #import "CQKeychain.h"
 
 #import <NMSSH/NMSSH.h>
@@ -130,9 +131,9 @@
 	SFTPUpload *upload = [SFTPUpload uploadFile:path];
 	upload.delegate = self;
 
-	[self.activeSessions addObject:upload];
-
-	[upload startOnQueue:self.uploadQueue];
+	if ([upload startOnQueue:self.uploadQueue]) {
+		[self.activeSessions addObject:upload];
+	}
 }
 
 - (void) uploadDidStart:(id <Upload>) upload {
