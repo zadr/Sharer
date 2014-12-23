@@ -138,6 +138,12 @@
 	if (session.isConnected) {
 		NSString *password = [[CQKeychain standardKeychain] passwordForServer:@"password" area:@"sharer"];
 		[session authenticateByPassword:password];
+		if (!session.isAuthorized) {
+			// try with standard key pair
+			[session authenticateByPublicKey:@"~/.ssh/id_rsa.pub"
+								  privateKey:@"~/.ssh/id_rsa"
+								 andPassword:password];
+		}
 	} else {
 		[self stopUpdatingButtonTitle];
 		NSLog(@"Unable to connect");
