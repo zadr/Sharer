@@ -91,7 +91,8 @@
 	[[CQKeychain standardKeychain] setPassword:self.passwordTextField.stringValue forServer:@"password" area:@"sharer"];
 
 	NSString *URLFormat = self.URLFormatTextField.stringValue;
-	if (URLFormat.length && !([URLFormat.lowercaseString hasPrefix:@"http://"] || [URLFormat.lowercaseString hasPrefix:@"https://"])) {
+	NSURL *URL = [NSURL URLWithString:URLFormat];
+	if (URLFormat.length && !URL.scheme.length) {
 		URLFormat = [@"http://" stringByAppendingString:URLFormat];
 	}
 	[[NSUserDefaults standardUserDefaults] setObject:URLFormat forKey:@"URLFormat"];
@@ -194,9 +195,10 @@
 				});
 
 				NSString *URLFormat = [[NSUserDefaults standardUserDefaults] objectForKey:@"URLFormat"];
-				NSString *URLString = [URLFormat stringByAppendingPathComponent:path.lastPathComponent];
+				NSURL *URL = [[NSURL URLWithString:URLFormat] URLByAppendingPathComponent:path.lastPathComponent];
+
 				[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
-				[[NSPasteboard generalPasteboard] setString:URLString forType:NSStringPboardType];
+				[[NSPasteboard generalPasteboard] setString:URL.absoluteString forType:NSStringPboardType];
 
 				NSUserNotification *notification = [[NSUserNotification alloc] init];
 				notification.title = NSLocalizedString(@"Uploaded", @"Uploaded");
