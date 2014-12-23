@@ -140,9 +140,9 @@
 		[session authenticateByPassword:password];
 		if (!session.isAuthorized) {
 			// try with standard key pair
-			[session authenticateByPublicKey:@"~/.ssh/id_rsa.pub"
-								  privateKey:@"~/.ssh/id_rsa"
-								 andPassword:password];
+			NSString *defaultPubkeyPath = [@"~/.ssh/id_rsa.pub" stringByExpandingTildeInPath];
+			NSString *defaultPrivkeyPath = [@"~/.ssh/id_rsa" stringByExpandingTildeInPath];
+			[session authenticateByPublicKey:defaultPubkeyPath privateKey:defaultPrivkeyPath andPassword:password];
 		}
 	} else {
 		[self stopUpdatingButtonTitle];
@@ -173,7 +173,8 @@
 		if (!remotePath.length) {
 			remotePath = @"";
 		}
-		[sftpSession writeStream:inputStream toFileAtPath:[remotePath stringByAppendingPathComponent:path.lastPathComponent] progress:^BOOL (NSUInteger progress) {
+		NSString *fullRemotePath = [remotePath stringByAppendingPathComponent:path.lastPathComponent];
+		[sftpSession writeStream:inputStream toFileAtPath:fullRemotePath progress:^BOOL (NSUInteger progress) {
 			if (progress == fileLength) {
 				dispatch_async(dispatch_get_main_queue(), ^{ // give the sftp session a chance to finish up any remaining work it has before we remove our references to it
 					__strong __typeof__((weakSelf)) strongSelf = weakSelf;
