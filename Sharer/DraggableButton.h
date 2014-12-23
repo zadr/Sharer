@@ -5,8 +5,9 @@
 @protocol DraggableDelegate <NSObject>
 @required
 - (void) button:(DraggableButton *) button didAcceptDragWithFileAtPath:(NSString *) path;
+- (NSMenu *) menuForDraggableButton:(DraggableButton *) button;
 @end
 
 @interface DraggableButton : NSButton
-@property (weak) id <DraggableDelegate> delegate;
+@property (nonatomic, weak) id <DraggableDelegate> delegate;
 @end

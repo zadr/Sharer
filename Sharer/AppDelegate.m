@@ -33,6 +33,8 @@
 	NSDictionary *defaults = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Defaults" ofType:@"plist"]];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
+	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
+
 	self.uploadQueue = dispatch_queue_create("net.thisismyinter.upload", DISPATCH_QUEUE_CONCURRENT);
 	self.activeSessions = [NSMutableSet set];
 
@@ -82,10 +84,18 @@
 	}
 }
 
+- (NSMenu *) applicationDockMenu:(NSApplication *) sender {
+	return self.menu;
+}
+
 #pragma mark -
 
 - (void) button:(DraggableButton *) button didAcceptDragWithFileAtPath:(NSString *) path {
 	[self uploadFileAtPath:path];
+}
+
+- (NSMenu *) menuForDraggableButton:(DraggableButton *) button {
+	return self.menu;
 }
 
 #pragma mark -
@@ -147,7 +157,6 @@
 	NSString *URLFormat = [[NSUserDefaults standardUserDefaults] objectForKey:@"URLFormat"];
 	NSURL *URL = [[NSURL URLWithString:URLFormat] URLByAppendingPathComponent:upload.source.lastPathComponent];
 
-	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
 	[[NSPasteboard generalPasteboard] setString:URL.absoluteString forType:NSStringPboardType];
 
 	NSUserNotification *notification = [[NSUserNotification alloc] init];
@@ -156,6 +165,18 @@
 	notification.soundName = NSUserNotificationDefaultSoundName;
 
 	[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+
+	NSMutableArray *recentUploads = [[[NSUserDefaults standardUserDefaults] objectForKey:@"RecentUploads"] mutableCopy];
+	if (!recentUploads) {
+		recentUploads = [NSMutableArray array];
+	}
+	[recentUploads insertObject:@{ @"file": upload.source, @"url": URL.absoluteString } atIndex:0];
+
+	while (recentUploads.count > [[NSUserDefaults standardUserDefaults] integerForKey:@"SRecentItems"]) {
+		[recentUploads removeLastObject];
+	}
+
+	[[NSUserDefaults standardUserDefaults] setObject:recentUploads forKey:@"RecentUploads"];
 }
 
 - (void) upload:(id <Upload>) upload didFailWithError:(NSError *) error {
@@ -170,6 +191,43 @@
 	[[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
 }
 
+
+#pragma mark -
+
+- (NSMenu *) menu {
+	NSMenu *menu = [[NSMenu alloc] init];
+
+	NSArray *recentUploads = [[NSUserDefaults standardUserDefaults] objectForKey:@"RecentUploads"];
+	if (recentUploads.count) {
+		[recentUploads enumerateObjectsUsingBlock:^(NSDictionary *upload, NSUInteger index, BOOL *stop) {
+			NSString *file = upload[@"file"];
+			NSMenuItem *item = nil;
+			if (index < 10) {
+				item = [[NSMenuItem alloc] initWithTitle:file.lastPathComponent action:@selector(copyItemToClipboard:) keyEquivalent:[NSString stringWithFormat:@"%tu", index]];
+				item.keyEquivalentModifierMask = NSCommandKeyMask;
+			} else {
+				item = [[NSMenuItem alloc] initWithTitle:file.lastPathComponent action:@selector(copyItemToClipboard:) keyEquivalent:@""];
+			}
+			item.representedObject = upload[@"url"];
+			[menu addItem:item];
+		}];
+		[menu addItem:[NSMenuItem separatorItem]];
+	}
+
+	NSMenuItem *preferencesItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Preferences", @"Preferences menu item") action:@selector(showPreferences:) keyEquivalent:@","];
+	preferencesItem.keyEquivalentModifierMask = NSCommandKeyMask;
+	[menu addItem:preferencesItem];
+
+	NSMenuItem *quitItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Quit", @"Quit menu item") action:@selector(terminate:) keyEquivalent:@"q"];
+	quitItem.keyEquivalentModifierMask = NSCommandKeyMask;
+	[menu addItem:quitItem];
+
+	return menu;
+}
+
+- (void) copyItemToClipboard:(NSMenuItem *) fromMenuItem {
+	[[NSPasteboard generalPasteboard] setString:fromMenuItem.representedObject forType:NSStringPboardType];
+}
 
 #pragma mark -
 

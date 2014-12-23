@@ -1,5 +1,7 @@
 #import "DraggableButton.h"
 
+static NSMenu *defaultMenu = nil;
+
 @implementation DraggableButton
 - (id) initWithFrame:(NSRect) frameRect {
 	if (!(self = [super initWithFrame:frameRect]))
@@ -13,12 +15,16 @@
 	return self;
 }
 
-- (NSDragOperation) draggingEntered:(id <NSDraggingInfo>) sender {
-	return NSDragOperationCopy;
+#pragma mark -
+
+- (void) setDelegate:(id<DraggableDelegate>) delegate {
+	_delegate = delegate;
+
+	defaultMenu = [self.delegate menuForDraggableButton:self];
 }
 
-- (void) mouseDown:(NSEvent *) theEvent {
-	// do nothing
+- (NSDragOperation) draggingEntered:(id <NSDraggingInfo>) sender {
+	return NSDragOperationCopy;
 }
 
 - (BOOL) performDragOperation:(id <NSDraggingInfo>) sender {
@@ -29,6 +35,18 @@
 	}
 
 	return YES;
+}
+
+#pragma mark -
+
+- (void) mouseDown:(NSEvent *) theEvent {
+	NSPoint point = [self convertPoint:[self bounds].origin toView:nil];
+	point.y -= NSHeight( [self frame] ) + 2.;
+	theEvent = [NSEvent mouseEventWithType:[theEvent type] location:point modifierFlags:[theEvent modifierFlags] timestamp:[theEvent timestamp] windowNumber:[[theEvent window] windowNumber] context:[theEvent context] eventNumber:[theEvent eventNumber] clickCount:[theEvent clickCount] pressure:[theEvent pressure]];
+
+	[NSMenu popUpContextMenu:[self.delegate menuForDraggableButton:self] withEvent:theEvent forView:self];
+
+	[super mouseDown:theEvent];
 }
 @end
 
