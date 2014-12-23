@@ -1,3 +1,5 @@
+#import <Foundation/Foundation.h>
+
 @interface CQKeychain : NSObject
 + (CQKeychain *) standardKeychain;
 
