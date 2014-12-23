@@ -113,9 +113,19 @@
 		return;
 	}
 
-	NMSSHSession *session = [NMSSHSession connectToHost:@"your.domain:22" withUsername:@"username"];
+	NSString *server = [[CQKeychain standardKeychain] passwordForServer:@"server" area:@"sharer"];
+	NSString *port = [[CQKeychain standardKeychain] passwordForServer:@"port" area:@"sharer"];
+	if (!port.length) {
+		port = @"22";
+	}
+	NSString *hostport = [NSString stringWithFormat:@"%@:%@", server, port];
+	NSString *username = [[CQKeychain standardKeychain] passwordForServer:@"username" area:@"sharer"];
+	NMSSHSession *session = [NMSSHSession connectToHost:hostport withUsername:username];
 	if (session.isConnected) {
-		[session authenticateByPassword:@"password"];
+		NSString *password = [[CQKeychain standardKeychain] passwordForServer:@"password" area:@"sharer"];
+		if (password.length) {
+			[session authenticateByPassword:@"password"];
+		}
 	} else {
 		[self stopUpdatingButtonTitle];
 		NSLog(@"Unable to connect");
@@ -141,7 +151,11 @@
 	__weak __typeof__((self)) weakSelf = self;
 	dispatch_async(self.uploadQueue, ^{
 		NSUInteger fileLength = [[[NSFileManager defaultManager] attributesOfItemAtPath:path error:nil] fileSize];
-		[sftpSession writeStream:inputStream toFileAtPath:[NSString stringWithFormat:@"/var/www/path/to/folder/%@", path.lastPathComponent] progress:^BOOL (NSUInteger progress) {
+		NSString *remotePath = [[CQKeychain standardKeychain] passwordForServer:@"remotePath" area:@"sharer"];
+		if (!remotePath.length) {
+			remotePath = @"";
+		}
+		[sftpSession writeStream:inputStream toFileAtPath:[remotePath stringByAppendingPathComponent:path.lastPathComponent] progress:^BOOL (NSUInteger progress) {
 			if (progress == fileLength) {
 				dispatch_async(dispatch_get_main_queue(), ^{ // give the sftp session a chance to finish up any remaining work it has before we remove our references to it
 					__strong __typeof__((weakSelf)) strongSelf = weakSelf;
