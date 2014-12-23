@@ -7,7 +7,6 @@
 
 	[self registerForDraggedTypes:@[ NSFilenamesPboardType ]];
 
-	self.alignment = NSLeftTextAlignment;
 	self.bordered = NO;
 	self.bezelStyle = 0;
 

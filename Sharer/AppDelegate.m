@@ -210,8 +210,6 @@
 }
 
 - (void) stopUpdatingButtonTitle {
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateButtonTitle) object:nil];
-
 	DraggableButton *button = (DraggableButton *)self.statusItem.view;
 	[button.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
 	[button setTitle:@"↑"];
