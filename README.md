@@ -1,11 +1,11 @@
-Small Mac app to upload files to an SFTP server after dragging them to the status bar or the dock.
+Small Mac app to upload files to a server over SFTP after dragging them to the status bar or the dock.
 
 Simplified BSD license.
 
 To do:
 - Build preferences for things such as:
 	- An option to hide the dock icon
-- Support plain FTP (through CFNetworking) and SCP (through NMSSH) as well.
+- Support plain FTP (through CFNetworking)
 - Keep track of recent uploads to re-copy them
 	- This should work through the Dock's recent items and a menu on the status item.
 
