@@ -12,6 +12,9 @@
 		92CBED8E1A48FDA700A02B9E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 92CBED8D1A48FDA700A02B9E /* Images.xcassets */; };
 		92CBED911A48FDA700A02B9E /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 92CBED8F1A48FDA700A02B9E /* MainMenu.xib */; };
 		92CBED9D1A48FDA700A02B9E /* SharerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 92CBED9C1A48FDA700A02B9E /* SharerTests.m */; };
+		92CBEDC01A4901A000A02B9E /* NMSSH.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92CBEDBB1A49019400A02B9E /* NMSSH.framework */; };
+		92CBEDC61A49022E00A02B9E /* NMSSH.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 92CBEDBB1A49019400A02B9E /* NMSSH.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		92CBEDC91A49047000A02B9E /* DraggableButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 92CBEDC81A49047000A02B9E /* DraggableButton.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -22,7 +25,41 @@
 			remoteGlobalIDString = 92CBED821A48FDA700A02B9E;
 			remoteInfo = Sharer;
 		};
+		92CBEDBA1A49019400A02B9E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 92CBEDB51A49019400A02B9E /* NMSSH.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E4E96D84158E10FD002E6E0A;
+			remoteInfo = NMSSH;
+		};
+		92CBEDBC1A49019400A02B9E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 92CBEDB51A49019400A02B9E /* NMSSH.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E4E96D9C158E10FD002E6E0A;
+			remoteInfo = NMSSHTests;
+		};
+		92CBEDBE1A49019C00A02B9E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 92CBEDB51A49019400A02B9E /* NMSSH.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = E4E96D83158E10FD002E6E0A;
+			remoteInfo = NMSSH;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		92CBEDC41A49021300A02B9E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				92CBEDC61A49022E00A02B9E /* NMSSH.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		92CBED831A48FDA700A02B9E /* Sharer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sharer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -35,6 +72,10 @@
 		92CBED961A48FDA700A02B9E /* SharerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SharerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		92CBED9B1A48FDA700A02B9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		92CBED9C1A48FDA700A02B9E /* SharerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SharerTests.m; sourceTree = "<group>"; };
+		92CBEDB51A49019400A02B9E /* NMSSH.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = NMSSH.xcodeproj; path = External/NMSSH/NMSSH.xcodeproj; sourceTree = SOURCE_ROOT; };
+		92CBEDC11A49020300A02B9E /* NMSSH.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NMSSH.framework; path = "../../../Library/Developer/Xcode/DerivedData/Sharer-aucanypmpqlwnmdxurevdadllumi/Build/Products/Debug/NMSSH.framework"; sourceTree = "<group>"; };
+		92CBEDC71A49047000A02B9E /* DraggableButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DraggableButton.h; sourceTree = "<group>"; };
+		92CBEDC81A49047000A02B9E /* DraggableButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DraggableButton.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,6 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92CBEDC01A4901A000A02B9E /* NMSSH.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				92CBED851A48FDA700A02B9E /* Sharer */,
+				92CBEDB51A49019400A02B9E /* NMSSH.xcodeproj */,
 				92CBED991A48FDA700A02B9E /* SharerTests */,
 				92CBED841A48FDA700A02B9E /* Products */,
 			);
@@ -78,6 +121,8 @@
 			children = (
 				92CBED881A48FDA700A02B9E /* AppDelegate.h */,
 				92CBED891A48FDA700A02B9E /* AppDelegate.m */,
+				92CBEDC71A49047000A02B9E /* DraggableButton.h */,
+				92CBEDC81A49047000A02B9E /* DraggableButton.m */,
 				92CBED8D1A48FDA700A02B9E /* Images.xcassets */,
 				92CBED8F1A48FDA700A02B9E /* MainMenu.xib */,
 				92CBED861A48FDA700A02B9E /* Supporting Files */,
@@ -88,6 +133,7 @@
 		92CBED861A48FDA700A02B9E /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				92CBEDC11A49020300A02B9E /* NMSSH.framework */,
 				92CBED871A48FDA700A02B9E /* Info.plist */,
 				92CBED8B1A48FDA700A02B9E /* main.m */,
 			);
@@ -111,6 +157,15 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		92CBEDB61A49019400A02B9E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				92CBEDBB1A49019400A02B9E /* NMSSH.framework */,
+				92CBEDBD1A49019400A02B9E /* NMSSHTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -121,10 +176,12 @@
 				92CBED7F1A48FDA700A02B9E /* Sources */,
 				92CBED801A48FDA700A02B9E /* Frameworks */,
 				92CBED811A48FDA700A02B9E /* Resources */,
+				92CBEDC41A49021300A02B9E /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				92CBEDBF1A49019C00A02B9E /* PBXTargetDependency */,
 			);
 			name = Sharer;
 			productName = Sharer;
@@ -177,6 +234,12 @@
 			mainGroup = 92CBED7A1A48FDA700A02B9E;
 			productRefGroup = 92CBED841A48FDA700A02B9E /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 92CBEDB61A49019400A02B9E /* Products */;
+					ProjectRef = 92CBEDB51A49019400A02B9E /* NMSSH.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				92CBED821A48FDA700A02B9E /* Sharer */,
@@ -184,6 +247,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		92CBEDBB1A49019400A02B9E /* NMSSH.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = NMSSH.framework;
+			remoteRef = 92CBEDBA1A49019400A02B9E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		92CBEDBD1A49019400A02B9E /* NMSSHTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = NMSSHTests.xctest;
+			remoteRef = 92CBEDBC1A49019400A02B9E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		92CBED811A48FDA700A02B9E /* Resources */ = {
@@ -211,6 +291,7 @@
 			files = (
 				92CBED8C1A48FDA700A02B9E /* main.m in Sources */,
 				92CBED8A1A48FDA700A02B9E /* AppDelegate.m in Sources */,
+				92CBEDC91A49047000A02B9E /* DraggableButton.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,6 +310,11 @@
 			isa = PBXTargetDependency;
 			target = 92CBED821A48FDA700A02B9E /* Sharer */;
 			targetProxy = 92CBED971A48FDA700A02B9E /* PBXContainerItemProxy */;
+		};
+		92CBEDBF1A49019C00A02B9E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = NMSSH;
+			targetProxy = 92CBEDBE1A49019C00A02B9E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -325,6 +411,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(USER_LIBRARY_DIR)/Developer/Xcode/DerivedData/Sharer-aucanypmpqlwnmdxurevdadllumi/Build/Products/Debug",
+				);
 				INFOPLIST_FILE = Sharer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -336,6 +426,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(USER_LIBRARY_DIR)/Developer/Xcode/DerivedData/Sharer-aucanypmpqlwnmdxurevdadllumi/Build/Products/Debug",
+				);
 				INFOPLIST_FILE = Sharer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";

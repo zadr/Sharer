@@ -1,0 +1,3 @@
+[submodule "External/NMSSH"]
+	path = External/NMSSH
+	url = https://github.com/Lejdborg/NMSSH.git
