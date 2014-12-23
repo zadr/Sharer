@@ -1,11 +1,18 @@
 #import "AppDelegate.h"
 
 #import "DraggableButton.h"
+#import "CQKeychain.h"
 
 #import <NMSSH/NMSSH.h>
 
 @interface AppDelegate () <DraggableDelegate>
 @property (weak) IBOutlet NSWindow *window;
+@property (weak) IBOutlet NSTextField *serverTextField;
+@property (weak) IBOutlet NSTextField *remotePathTextField;
+@property (weak) IBOutlet NSTextField *portTextField;
+@property (weak) IBOutlet NSTextField *usernameTextField;
+@property (weak) IBOutlet NSTextField *passwordTextField;
+
 @property (strong) NSStatusItem *statusItem;
 
 @property (atomic) NSInteger numberOfDots;
@@ -14,8 +21,10 @@
 @property (strong) NSMutableSet *activeSessions;
 @end
 
+#pragma mark -
+
 @implementation AppDelegate
-- (void) applicationDidFinishLaunching:(NSNotification *) notification {
+- (void) applicationWillFinishLaunching:(NSNotification *) notification {
 	self.uploadQueue = dispatch_queue_create("net.thisismyinter.upload", DISPATCH_QUEUE_CONCURRENT);
 	self.activeSessions = [NSMutableSet set];
 
@@ -26,6 +35,25 @@
 
 	button.delegate = self;
 	self.statusItem.view = button;
+}
+
+- (void) applicationDidFinishLaunching:(NSNotification *) notification {
+	self.usernameTextField.placeholderString = NSUserName();
+
+#define SetValueOfTypeOnField(type, field) \
+	do { \
+		NSString *value = [[CQKeychain standardKeychain] passwordForServer:type area:@"sharer"]; \
+		if (value.length) { \
+			field.stringValue = value; \
+		} \
+	} while (0)
+
+	SetValueOfTypeOnField(@"server", self.serverTextField);
+	SetValueOfTypeOnField(@"port", self.portTextField);
+	SetValueOfTypeOnField(@"remotePath", self.remotePathTextField);
+	SetValueOfTypeOnField(@"username", self.usernameTextField);
+	SetValueOfTypeOnField(@"password", self.passwordTextField);
+#undef SetValueOfTypeOnField
 }
 
 - (BOOL) application:(NSApplication *) sender openFile:(NSString *) filename {
@@ -43,6 +71,34 @@
 
 - (void) button:(DraggableButton *) button didAcceptDragWithFileAtPath:(NSString *) path {
 	[self uploadFileAtPath:path];
+}
+
+#pragma mark -
+
+- (BOOL) control:(NSControl *) control textShouldEndEditing:(NSText *) fieldEditor {
+	[[CQKeychain standardKeychain] setPassword:self.serverTextField.stringValue forServer:@"server" area:@"sharer"];
+	[[CQKeychain standardKeychain] setPassword:self.portTextField.stringValue forServer:@"port" area:@"sharer"];
+	[[CQKeychain standardKeychain] setPassword:self.remotePathTextField.stringValue forServer:@"remotePath" area:@"sharer"];
+	[[CQKeychain standardKeychain] setPassword:self.usernameTextField.stringValue forServer:@"username" area:@"sharer"];
+	[[CQKeychain standardKeychain] setPassword:self.passwordTextField.stringValue forServer:@"password" area:@"sharer"];
+
+	return YES;
+}
+
+- (BOOL) control:(NSControl *) control isValidObject:(id) object {
+	if (control == self.portTextField) {
+		int port = [[object description] intValue];
+		BOOL validPort = ![object length] || (port && port < 65536);
+		if (!validPort) {
+			NSAlert *alert = [[NSAlert alloc] init];
+			alert.messageText = NSLocalizedString(@"Invalid Port", @"Invalid Port alert title");
+			alert.informativeText = NSLocalizedString(@"Port must be between 1 and 65535.", @"Port must be between 1 and 65535 alert body");
+			[alert addButtonWithTitle:NSLocalizedString(@"Okay", @"Okay")];
+			[alert runModal];
+		}
+		return validPort;
+	}
+	return YES;
 }
 
 #pragma mark -

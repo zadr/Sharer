@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		925FC5491A491E1000E8C24A /* FTPUpload.m in Sources */ = {isa = PBXBuildFile; fileRef = 925FC5481A491E1000E8C24A /* FTPUpload.m */; };
+		925FC54E1A49383300E8C24A /* CQKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 925FC54D1A49383300E8C24A /* CQKeychain.m */; };
 		92CBED8A1A48FDA700A02B9E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 92CBED891A48FDA700A02B9E /* AppDelegate.m */; };
 		92CBED8C1A48FDA700A02B9E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 92CBED8B1A48FDA700A02B9E /* main.m */; };
 		92CBED8E1A48FDA700A02B9E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 92CBED8D1A48FDA700A02B9E /* Images.xcassets */; };
@@ -62,6 +64,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		925FC5471A491E1000E8C24A /* FTPUpload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FTPUpload.h; path = ../../Desktop/Sharer/Sharer/FTPUpload.h; sourceTree = "<group>"; };
+		925FC5481A491E1000E8C24A /* FTPUpload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FTPUpload.m; path = ../../Desktop/Sharer/Sharer/FTPUpload.m; sourceTree = "<group>"; };
+		925FC54C1A49383300E8C24A /* CQKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CQKeychain.h; sourceTree = "<group>"; };
+		925FC54D1A49383300E8C24A /* CQKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CQKeychain.m; sourceTree = "<group>"; };
 		92CBED831A48FDA700A02B9E /* Sharer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sharer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92CBED871A48FDA700A02B9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		92CBED881A48FDA700A02B9E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -97,12 +103,43 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		925FC54B1A49383300E8C24A /* Keychain */ = {
+			isa = PBXGroup;
+			children = (
+				925FC54C1A49383300E8C24A /* CQKeychain.h */,
+				925FC54D1A49383300E8C24A /* CQKeychain.m */,
+			);
+			name = Keychain;
+			path = ../../Desktop/Sharer/External/Keychain;
+			sourceTree = "<group>";
+		};
+		925FC54F1A49383A00E8C24A /* External */ = {
+			isa = PBXGroup;
+			children = (
+				92CBEDC11A49020300A02B9E /* NMSSH.framework */,
+				92CBEDB51A49019400A02B9E /* NMSSH.xcodeproj */,
+				925FC54B1A49383300E8C24A /* Keychain */,
+			);
+			name = External;
+			sourceTree = "<group>";
+		};
+		925FC5501A49384800E8C24A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				92CBED871A48FDA700A02B9E /* Info.plist */,
+				92CBED8D1A48FDA700A02B9E /* Images.xcassets */,
+				92CBED8F1A48FDA700A02B9E /* MainMenu.xib */,
+			);
+			name = Resources;
+			path = Sharer;
+			sourceTree = "<group>";
+		};
 		92CBED7A1A48FDA700A02B9E = {
 			isa = PBXGroup;
 			children = (
-				92CBED851A48FDA700A02B9E /* Sharer */,
-				92CBEDB51A49019400A02B9E /* NMSSH.xcodeproj */,
-				92CBED991A48FDA700A02B9E /* SharerTests */,
+				92CBED851A48FDA700A02B9E /* Code */,
+				925FC5501A49384800E8C24A /* Resources */,
+				92CBED991A48FDA700A02B9E /* Tests */,
 				92CBED841A48FDA700A02B9E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -116,36 +153,29 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		92CBED851A48FDA700A02B9E /* Sharer */ = {
+		92CBED851A48FDA700A02B9E /* Code */ = {
 			isa = PBXGroup;
 			children = (
-				92CBED881A48FDA700A02B9E /* AppDelegate.h */,
 				92CBED891A48FDA700A02B9E /* AppDelegate.m */,
-				92CBEDC71A49047000A02B9E /* DraggableButton.h */,
+				92CBED881A48FDA700A02B9E /* AppDelegate.h */,
 				92CBEDC81A49047000A02B9E /* DraggableButton.m */,
-				92CBED8D1A48FDA700A02B9E /* Images.xcassets */,
-				92CBED8F1A48FDA700A02B9E /* MainMenu.xib */,
-				92CBED861A48FDA700A02B9E /* Supporting Files */,
+				92CBEDC71A49047000A02B9E /* DraggableButton.h */,
+				925FC5481A491E1000E8C24A /* FTPUpload.m */,
+				925FC5471A491E1000E8C24A /* FTPUpload.h */,
+				92CBED8B1A48FDA700A02B9E /* main.m */,
+				925FC54F1A49383A00E8C24A /* External */,
 			);
+			name = Code;
 			path = Sharer;
 			sourceTree = "<group>";
 		};
-		92CBED861A48FDA700A02B9E /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				92CBEDC11A49020300A02B9E /* NMSSH.framework */,
-				92CBED871A48FDA700A02B9E /* Info.plist */,
-				92CBED8B1A48FDA700A02B9E /* main.m */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		92CBED991A48FDA700A02B9E /* SharerTests */ = {
+		92CBED991A48FDA700A02B9E /* Tests */ = {
 			isa = PBXGroup;
 			children = (
 				92CBED9C1A48FDA700A02B9E /* SharerTests.m */,
 				92CBED9A1A48FDA700A02B9E /* Supporting Files */,
 			);
+			name = Tests;
 			path = SharerTests;
 			sourceTree = "<group>";
 		};
@@ -290,8 +320,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				92CBED8C1A48FDA700A02B9E /* main.m in Sources */,
+				925FC5491A491E1000E8C24A /* FTPUpload.m in Sources */,
 				92CBED8A1A48FDA700A02B9E /* AppDelegate.m in Sources */,
 				92CBEDC91A49047000A02B9E /* DraggableButton.m in Sources */,
+				925FC54E1A49383300E8C24A /* CQKeychain.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
