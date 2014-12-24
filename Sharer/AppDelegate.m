@@ -35,8 +35,6 @@
 	NSDictionary *defaults = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Defaults" ofType:@"plist"]];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
-	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
-
 	self.uploadQueue = dispatch_queue_create("net.thisismyinter.upload", DISPATCH_QUEUE_CONCURRENT);
 	self.activeSessions = [NSMutableSet set];
 
@@ -161,6 +159,7 @@
 	NSString *URLFormat = [[NSUserDefaults standardUserDefaults] objectForKey:@"URLFormat"];
 	NSURL *URL = [[NSURL URLWithString:URLFormat] URLByAppendingPathComponent:upload.destinationName];
 
+	[[NSPasteboard generalPasteboard] declareTypes:@[ NSStringPboardType ] owner:nil];
 	[[NSPasteboard generalPasteboard] setString:URL.absoluteString forType:NSStringPboardType];
 
 	NSUserNotification *notification = [[NSUserNotification alloc] init];
