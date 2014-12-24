@@ -259,6 +259,8 @@
 	button.title = nil;
 
 	[button addSubview:indicator];
+
+	button.progressIndicator = indicator;
 }
 
 - (void) stopUpdatingButtonTitle {
@@ -267,7 +269,7 @@
 	}
 
 	DraggableButton *button = (DraggableButton *)self.statusItem.view;
-	[button.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+	[button.progressIndicator removeFromSuperview];
 	[button setTitle:@"↑"];
 }
 

@@ -10,4 +10,5 @@
 
 @interface DraggableButton : NSButton
 @property (nonatomic, weak) id <DraggableDelegate> delegate;
+@property (nonatomic, weak) NSProgressIndicator *progressIndicator;
 @end
