@@ -1,5 +1,7 @@
 #import "FTPUpload.h"
 
+#import "NSFileManagerAdditions.h"
+
 #import "CQKeychain.h"
 
 #include <CFNetwork/CFNetwork.h>
@@ -8,6 +10,7 @@ static NSUInteger const kSendBufferSize = 32768;
 
 @interface FTPUpload () <NSStreamDelegate>
 @property (atomic, copy, readwrite) NSString *source;
+@property (atomic, copy, readwrite) NSString *destinationName;
 
 @property (atomic, strong, readwrite) NSOutputStream *networkStream;
 @property (atomic, strong, readwrite) NSInputStream *fileStream;
@@ -21,9 +24,10 @@ static NSUInteger const kSendBufferSize = 32768;
 
 @synthesize delegate;
 
-+ (FTPUpload *) uploadFile:(NSString *) file {
++ (id <Upload>) uploadFile:(NSString *) file withRemoteName:(NSString *) name {
 	FTPUpload *upload = [[FTPUpload alloc] init];
 	upload.source = file;
+	upload.destinationName = name;
 	return upload;
 }
 
@@ -72,7 +76,7 @@ static NSUInteger const kSendBufferSize = 32768;
 		}
 	}
 
-	url = [url URLByAppendingPathComponent:self.source.lastPathComponent];
+	url = [url URLByAppendingPathComponent:self.destinationName];
 	if (!url) {
 		return NO;
 	}	

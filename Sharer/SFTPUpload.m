@@ -1,6 +1,9 @@
 #import "SFTPUpload.h"
 
+#import "NSFileManagerAdditions.h"
+
 #import "CQKeychain.h"
+
 #import <NMSSH/NMSSH.h>
 
 //@protocol UploadDelegate <NSObject>
@@ -11,6 +14,7 @@
 
 @interface SFTPUpload ()
 @property (atomic, copy, readwrite) NSString *source;
+@property (atomic, copy, readwrite) NSString *destinationName;
 @property (atomic, strong) NMSSHSession *session;
 @property (atomic, strong) NMSFTP *sftpSession;
 @end
@@ -18,9 +22,10 @@
 @implementation SFTPUpload
 @synthesize delegate;
 
-+ (id <Upload>) uploadFile:(NSString *) file {
++ (id <Upload>) uploadFile:(NSString *) file withRemoteName:(NSString *) name {
 	SFTPUpload *upload = [[SFTPUpload alloc] init];
 	upload.source = file;
+	upload.destinationName = name;
 	return upload;
 }
 
@@ -88,8 +93,8 @@
 
 		[strongDelegate uploadDidStart:strongSelf];
 
-		NSString *fullRemotePath = [remotePath stringByAppendingPathComponent:strongSelf.source.lastPathComponent];
-		BOOL wroteStream = [sftpSession writeStream:inputStream toFileAtPath:fullRemotePath progress:^BOOL(NSUInteger progress) {
+		NSString *fullPath = [remotePath stringByAppendingPathComponent:self.destinationName];
+		BOOL wroteStream = [sftpSession writeStream:inputStream toFileAtPath:fullPath progress:^BOOL(NSUInteger progress) {
 			if (progress == fileLength) {
 				dispatch_async(dispatch_get_main_queue(), ^{ // give the sftp session a chance to finish up any remaining work it has before we remove our references to it
 					__strong __typeof__((weakSelf)) strongAsyncSelf = weakSelf;
@@ -97,7 +102,6 @@
 
 					[sftpSession disconnect];
 					[session disconnect];
-
 					[strongAsyncDelegate uploadDidFinish:strongAsyncSelf];
 
 					strongAsyncSelf.sftpSession = nil;

@@ -10,11 +10,12 @@
 
 @protocol Upload <NSObject>
 @required
-+ (id <Upload>) uploadFile:(NSString *) file;
++ (id <Upload>) uploadFile:(NSString *) file withRemoteName:(NSString *) name;
 
 @property (atomic, weak) id <UploadDelegate> delegate;
 @property (nonatomic, assign, readonly) BOOL isSending;
 @property (atomic, copy, readonly) NSString *source;
+@property (atomic, copy, readonly) NSString *destinationName;
 
 - (BOOL) startOnQueue:(dispatch_queue_t) uploadQueue;
 - (void) stop;

@@ -1,15 +1,17 @@
 #import "AppDelegate.h"
 
+#import "PreferencesWindowController.h"
 #import "DraggableButton.h"
 #import "SFTPUpload.h"
 #import "FTPUpload.h"
+#import "NSFileManagerAdditions.h"
 #import "CQKeychain.h"
 
 #import <NMSSH/NMSSH.h>
 
 @interface AppDelegate () <DraggableDelegate, UploadDelegate>
 @property (weak) IBOutlet NSWindow *window;
-@property (strong) NSWindow *preferencesWindow;
+@property (strong) PreferencesWindowController *preferencesWindowController;;
 
 @property (weak) IBOutlet NSTextField *serverTextField;
 @property (weak) IBOutlet NSTextField *remotePathTextField;
@@ -38,13 +40,7 @@
 	self.uploadQueue = dispatch_queue_create("net.thisismyinter.upload", DISPATCH_QUEUE_CONCURRENT);
 	self.activeSessions = [NSMutableSet set];
 
-	self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-
-	DraggableButton *button = [[DraggableButton alloc] initWithFrame:NSMakeRect(0., 0., 22., 22.)];
-	[button setTitle:@"↑"];
-
-	button.delegate = self;
-	self.statusItem.view = button;
+	[self updateUIElements];
 }
 
 - (void) applicationDidFinishLaunching:(NSNotification *) notification {
@@ -85,7 +81,7 @@
 }
 
 - (NSMenu *) applicationDockMenu:(NSApplication *) sender {
-	return self.menu;
+	return [self menuIncludingQuitItem:NO];
 }
 
 #pragma mark -
@@ -95,7 +91,7 @@
 }
 
 - (NSMenu *) menuForDraggableButton:(DraggableButton *) button {
-	return self.menu;
+	return [self menuIncludingQuitItem:YES];
 }
 
 #pragma mark -
@@ -138,7 +134,15 @@
 #pragma mark -
 
 - (void) uploadFileAtPath:(NSString *) path {
-	SFTPUpload *upload = [SFTPUpload uploadFile:path];
+	NSString *salt = [[CQKeychain standardKeychain] passwordForServer:@"UUID" area:@"Sharer"];
+	if (!salt) {
+		salt = [[NSUUID UUID] UUIDString];
+		[[CQKeychain standardKeychain] setPassword:salt forServer:@"UUID" area:@"Sharer"];
+	}
+
+	NSString *fileName = [[NSFileManager defaultManager] remoteNameForFileAtPath:path withOptionalSalt:salt];
+
+	SFTPUpload *upload = [SFTPUpload uploadFile:path withRemoteName:fileName];
 	upload.delegate = self;
 
 	if ([upload startOnQueue:self.uploadQueue]) {
@@ -155,7 +159,7 @@
 	[self stopUpdatingButtonTitle];
 
 	NSString *URLFormat = [[NSUserDefaults standardUserDefaults] objectForKey:@"URLFormat"];
-	NSURL *URL = [[NSURL URLWithString:URLFormat] URLByAppendingPathComponent:upload.source.lastPathComponent];
+	NSURL *URL = [[NSURL URLWithString:URLFormat] URLByAppendingPathComponent:upload.destinationName];
 
 	[[NSPasteboard generalPasteboard] setString:URL.absoluteString forType:NSStringPboardType];
 
@@ -194,7 +198,7 @@
 
 #pragma mark -
 
-- (NSMenu *) menu {
+- (NSMenu *) menuIncludingQuitItem:(BOOL) includingQuitItem {
 	NSMenu *menu = [[NSMenu alloc] init];
 
 	NSArray *recentUploads = [[NSUserDefaults standardUserDefaults] objectForKey:@"RecentUploads"];
@@ -218,15 +222,25 @@
 	preferencesItem.keyEquivalentModifierMask = NSCommandKeyMask;
 	[menu addItem:preferencesItem];
 
-	NSMenuItem *quitItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Quit", @"Quit menu item") action:@selector(terminate:) keyEquivalent:@"q"];
-	quitItem.keyEquivalentModifierMask = NSCommandKeyMask;
-	[menu addItem:quitItem];
+	if (includingQuitItem) {
+		NSMenuItem *quitItem = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"Quit", @"Quit menu item") action:@selector(terminate:) keyEquivalent:@"q"];
+		quitItem.keyEquivalentModifierMask = NSCommandKeyMask;
+		[menu addItem:quitItem];
+	}
 
 	return menu;
 }
 
 - (void) copyItemToClipboard:(NSMenuItem *) fromMenuItem {
 	[[NSPasteboard generalPasteboard] setString:fromMenuItem.representedObject forType:NSStringPboardType];
+}
+
+- (void) showPreferences:(id) sender {
+	if (!self.preferencesWindowController) {
+		self.preferencesWindowController = [[PreferencesWindowController alloc] init];
+	}
+
+	[self.preferencesWindowController showWindow:nil];
 }
 
 #pragma mark -
@@ -257,4 +271,62 @@
 	[button setTitle:@"↑"];
 }
 
+#pragma mark -
+
+- (void) updateUIElements {
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"SShowDockIcon"]) {
+		[self showDockIcon];
+	} else {
+		[self hideDockIcon];
+	}
+
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"SShowStatusItem"]) {
+		[self showStatusItem];
+	} else {
+		[self hideStatusItem];
+	}
+}
+
+- (void) updateRecentItems {
+	NSMutableArray *recentUploads = [[[NSUserDefaults standardUserDefaults] objectForKey:@"RecentUploads"] mutableCopy];
+	NSInteger maxRecentUploadsCount = [[NSUserDefaults standardUserDefaults] integerForKey:@"SRecentItems"];
+	if (maxRecentUploadsCount > recentUploads.count) {
+		return;
+	}
+
+	while (recentUploads.count > maxRecentUploadsCount) {
+		[recentUploads removeLastObject];
+	}
+	[[NSUserDefaults standardUserDefaults] setObject:recentUploads forKey:@"RecentUploads"];
+}
+
+#pragma mark -
+
+- (void) showDockIcon {
+	if ([[NSUserDefaults standardUserDefaults] boolForKey:@"SShowDockIcon"]) {
+		ProcessSerialNumber psn = { 0, kCurrentProcess };
+		TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+	}
+}
+
+- (void) hideDockIcon {
+	if (![[NSUserDefaults standardUserDefaults] boolForKey:@"SShowDockIcon"]) {
+		ProcessSerialNumber psn = { 0, kCurrentProcess };
+		TransformProcessType(&psn, kProcessTransformToUIElementApplication);
+	}
+}
+
+- (void) showStatusItem {
+	self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
+
+	DraggableButton *button = [[DraggableButton alloc] initWithFrame:NSMakeRect(0., 0., 22., 22.)];
+	[button setTitle:@"↑"];
+
+	button.delegate = self;
+	self.statusItem.view = button;
+}
+
+- (void) hideStatusItem {
+	self.statusItem = nil;
+}
 @end

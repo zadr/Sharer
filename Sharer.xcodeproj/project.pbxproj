@@ -12,6 +12,8 @@
 		925FC5581A4A030D00E8C24A /* Defaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = 925FC5571A4A030D00E8C24A /* Defaults.plist */; };
 		92A7118F1A4A048F009E80F0 /* FTPUpload.m in Sources */ = {isa = PBXBuildFile; fileRef = 92A7118C1A4A048F009E80F0 /* FTPUpload.m */; };
 		92A711901A4A048F009E80F0 /* SFTPUpload.m in Sources */ = {isa = PBXBuildFile; fileRef = 92A7118E1A4A048F009E80F0 /* SFTPUpload.m */; };
+		92A7119A1A4A8B26009E80F0 /* PreferencesWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 92A711991A4A8B26009E80F0 /* PreferencesWindowController.m */; };
+		92A7119D1A4A9720009E80F0 /* NSFileManagerAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 92A7119C1A4A9720009E80F0 /* NSFileManagerAdditions.m */; };
 		92CBED8A1A48FDA700A02B9E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 92CBED891A48FDA700A02B9E /* AppDelegate.m */; };
 		92CBED8C1A48FDA700A02B9E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 92CBED8B1A48FDA700A02B9E /* main.m */; };
 		92CBED8E1A48FDA700A02B9E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 92CBED8D1A48FDA700A02B9E /* Images.xcassets */; };
@@ -76,6 +78,10 @@
 		92A711911A4A04B0009E80F0 /* Upload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Upload.h; sourceTree = "<group>"; };
 		92A711921A4A0564009E80F0 /* FTPUpload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FTPUpload.h; sourceTree = "<group>"; };
 		92A711931A4A0564009E80F0 /* SFTPUpload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SFTPUpload.h; sourceTree = "<group>"; };
+		92A711981A4A8B26009E80F0 /* PreferencesWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesWindowController.h; sourceTree = "<group>"; };
+		92A711991A4A8B26009E80F0 /* PreferencesWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesWindowController.m; sourceTree = "<group>"; };
+		92A7119B1A4A9720009E80F0 /* NSFileManagerAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManagerAdditions.h; sourceTree = "<group>"; };
+		92A7119C1A4A9720009E80F0 /* NSFileManagerAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManagerAdditions.m; sourceTree = "<group>"; };
 		92CBED831A48FDA700A02B9E /* Sharer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sharer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92CBED871A48FDA700A02B9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		92CBED881A48FDA700A02B9E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -170,11 +176,15 @@
 				92CBED881A48FDA700A02B9E /* AppDelegate.h */,
 				92CBEDC81A49047000A02B9E /* DraggableButton.m */,
 				92CBEDC71A49047000A02B9E /* DraggableButton.h */,
+				92A711991A4A8B26009E80F0 /* PreferencesWindowController.m */,
+				92A711981A4A8B26009E80F0 /* PreferencesWindowController.h */,
 				92A711911A4A04B0009E80F0 /* Upload.h */,
 				92A7118C1A4A048F009E80F0 /* FTPUpload.m */,
 				92A711921A4A0564009E80F0 /* FTPUpload.h */,
 				92A7118E1A4A048F009E80F0 /* SFTPUpload.m */,
 				92A711931A4A0564009E80F0 /* SFTPUpload.h */,
+				92A7119C1A4A9720009E80F0 /* NSFileManagerAdditions.m */,
+				92A7119B1A4A9720009E80F0 /* NSFileManagerAdditions.h */,
 				92CBED8B1A48FDA700A02B9E /* main.m */,
 				925FC54F1A49383A00E8C24A /* External */,
 			);
@@ -336,7 +346,9 @@
 			files = (
 				92CBED8C1A48FDA700A02B9E /* main.m in Sources */,
 				92CBED8A1A48FDA700A02B9E /* AppDelegate.m in Sources */,
+				92A7119D1A4A9720009E80F0 /* NSFileManagerAdditions.m in Sources */,
 				92A7118F1A4A048F009E80F0 /* FTPUpload.m in Sources */,
+				92A7119A1A4A8B26009E80F0 /* PreferencesWindowController.m in Sources */,
 				92A711901A4A048F009E80F0 /* SFTPUpload.m in Sources */,
 				92CBEDC91A49047000A02B9E /* DraggableButton.m in Sources */,
 				925FC5531A49515A00E8C24A /* CQKeychain.m in Sources */,
